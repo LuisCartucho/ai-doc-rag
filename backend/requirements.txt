@@ -5,3 +5,5 @@ langchain-ollama
 langchain-core
 pydantic
 python-dotenv
+python-multipart
+pypdf

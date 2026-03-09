@@ -55,7 +55,7 @@
     .card p { font-size: 0.85rem; color: #666; margin-bottom: 16px; }
 
     label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px; }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #ddd;
@@ -103,6 +103,43 @@
       color: #856404;
     }
 
+    .mode-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .mode-tab {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: #666;
+      background: white;
+      transition: all 0.15s;
+    }
+    .mode-tab.active {
+      background: #e74c3c;
+      color: white;
+      border-color: #e74c3c;
+    }
+    .mode-panel { display: none; }
+    .mode-panel.active { display: block; }
+
+    .upload-area {
+      border: 2px dashed #ddd;
+      border-radius: 6px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .upload-area:hover { border-color: #e74c3c; background: #fff5f5; }
+    .upload-area input[type="file"] { display: none; }
+    .upload-area .upload-label { font-size: 0.85rem; color: #666; cursor: pointer; }
+    .upload-area .upload-label strong { color: #e74c3c; }
+
     .loading { color: #888; font-style: italic; }
     .error { color: #e74c3c; }
 
@@ -124,7 +161,7 @@
 <header>
   <h1>AI Doc Cases</h1>
   <span class="badge">No RAG</span>
-  <span style="font-size:0.8rem; opacity:0.8;">API uses only metadata – no actual document content</span>
+  <span style="font-size:0.8rem; opacity:0.8;">No vector database – compare metadata vs full-text-in-prompt</span>
 </header>
 
 <div class="tabs">
@@ -155,7 +192,6 @@
 
     <br/>
     <button onclick="runSearch()" id="search-btn">Search</button>
-
     <div id="search-result" class="result" style="display:none"></div>
   </div>
 </div>
@@ -163,27 +199,69 @@
 <!-- CASE 2: Classify -->
 <div id="case2" class="panel">
   <div class="warning-banner">
-    No RAG: Classification is based on <strong>title and description only</strong>. Ambiguous documents may be misclassified.
+    No RAG: No vector database is used. Compare how much better results get when the AI actually reads the document text.
   </div>
   <div class="card">
     <h2>Case 2 – Document Classification</h2>
-    <p>Enter a document title and description. The AI will classify it into one of 5 categories.</p>
+    <p>Choose how to provide the document to the AI:</p>
 
-    <label>Document title</label>
-    <input type="text" id="classify-title" placeholder="e.g. Return Policy 2024" />
-
-    <label>Short description</label>
-    <textarea id="classify-desc" placeholder="e.g. Describes rules for returning items and 14-day withdrawal rights."></textarea>
-
-    <div class="example-queries">
-      Try (click to fill):
-      <span onclick="fillClassify('Return Policy 2024', 'Describes rules for returning items and 14-day withdrawal rights.')">Return Policy</span>
-      <span onclick="fillClassify('Internal HR Policy 2024', 'Covers employment conditions, working hours, holiday, and benefits. Confidential.')">HR Policy</span>
-      <span onclick="fillClassify('Product Warranty 2024', 'Warranty conditions for electronics and accessories.')">Warranty</span>
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="switchMode('case2', 'manual', this)">Manual input</button>
+      <button class="mode-tab" onclick="switchMode('case2', 'file', this)">Select a file</button>
+      <button class="mode-tab" onclick="switchMode('case2', 'upload', this)">Upload a file</button>
     </div>
 
-    <br/>
-    <button onclick="runClassify()" id="classify-btn">Classify</button>
+    <!-- Mode 1: Manual -->
+    <div id="case2-manual" class="mode-panel active">
+      <label>Document title</label>
+      <input type="text" id="classify-title" placeholder="e.g. Return Policy 2024" />
+      <label>Short description</label>
+      <textarea id="classify-desc" placeholder="e.g. Describes rules for returning items and 14-day withdrawal rights."></textarea>
+      <div class="example-queries">
+        Try:
+        <span onclick="fillClassify('Return Policy 2024', 'Describes rules for returning items and 14-day withdrawal rights.')">Return Policy</span>
+        <span onclick="fillClassify('Internal HR Policy 2024', 'Covers employment conditions, working hours, holiday, and benefits. Confidential.')">HR Policy</span>
+        <span onclick="fillClassify('Product Warranty 2024', 'Warranty conditions for electronics and accessories.')">Warranty</span>
+      </div>
+      <br/>
+      <button onclick="runClassify()" id="classify-btn">Classify</button>
+    </div>
+
+    <!-- Mode 2: Select a file -->
+    <div id="case2-file" class="mode-panel">
+      <label>Select a pre-loaded document</label>
+      <select id="classify-filename">
+        <optgroup label="TXT documents">
+          <option value="return-policy.txt">return-policy.txt</option>
+          <option value="delivery-terms.txt">delivery-terms.txt</option>
+          <option value="product-warranty.txt">product-warranty.txt</option>
+          <option value="privacy-policy.txt">privacy-policy.txt</option>
+          <option value="internal-hr-policy.txt">internal-hr-policy.txt</option>
+        </optgroup>
+        <optgroup label="PDF documents">
+          <option value="return-policy.pdf">return-policy.pdf</option>
+          <option value="delivery-terms.pdf">delivery-terms.pdf</option>
+          <option value="product-warranty.pdf">product-warranty.pdf</option>
+          <option value="privacy-policy.pdf">privacy-policy.pdf</option>
+          <option value="internal-hr-policy.pdf">internal-hr-policy.pdf</option>
+        </optgroup>
+      </select>
+      <small style="color:#888; display:block; margin-top:-8px; margin-bottom:12px;">
+        Full text is extracted and sent directly in the LLM prompt – no vector search.
+      </small>
+      <button onclick="runClassifyFile()" id="classify-file-btn">Classify</button>
+    </div>
+
+    <!-- Mode 3: Upload -->
+    <div id="case2-upload" class="mode-panel">
+      <div class="upload-area" onclick="document.getElementById('classify-upload-input').click()">
+        <input type="file" id="classify-upload-input" accept=".pdf,.txt" onchange="runClassifyUpload()" />
+        <div class="upload-label">
+          <strong>Click to upload</strong> a PDF or TXT file<br/>
+          <small style="color:#aaa;">Full text sent directly in the LLM prompt – no vector search</small>
+        </div>
+      </div>
+    </div>
 
     <div id="classify-result" class="result" style="display:none"></div>
   </div>
@@ -192,27 +270,69 @@
 <!-- CASE 3: Metadata -->
 <div id="case3" class="panel">
   <div class="warning-banner">
-    No RAG: Metadata is extracted from <strong>title and description only</strong>. Specific dates and rules may be hallucinated.
+    No RAG: No vector database is used. Notice how specific facts (dates, numbers) change when the AI actually reads the document.
   </div>
   <div class="card">
     <h2>Case 3 – Metadata Extraction</h2>
-    <p>Enter a document title and description. The AI will extract structured metadata.</p>
+    <p>Choose how to provide the document to the AI:</p>
 
-    <label>Document title</label>
-    <input type="text" id="meta-title" placeholder="e.g. Internal HR Policy 2024" />
-
-    <label>Short description</label>
-    <textarea id="meta-desc" placeholder="e.g. Covers employment conditions, working hours, holiday, and benefits."></textarea>
-
-    <div class="example-queries">
-      Try (click to fill):
-      <span onclick="fillMeta('Internal HR Policy 2024', 'Covers employment conditions, working hours, holiday, salary, and benefits. Confidential.')">HR Policy</span>
-      <span onclick="fillMeta('Privacy Policy 2024', 'GDPR-compliant privacy policy about data collection and customer rights.')">Privacy Policy</span>
-      <span onclick="fillMeta('Product Warranty 2024', 'Warranty conditions for electronics and accessories sold by Nordic Shop.')">Warranty</span>
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="switchMode('case3', 'manual', this)">Manual input</button>
+      <button class="mode-tab" onclick="switchMode('case3', 'file', this)">Select a file</button>
+      <button class="mode-tab" onclick="switchMode('case3', 'upload', this)">Upload a file</button>
     </div>
 
-    <br/>
-    <button onclick="runMeta()" id="meta-btn">Extract Metadata</button>
+    <!-- Mode 1: Manual -->
+    <div id="case3-manual" class="mode-panel active">
+      <label>Document title</label>
+      <input type="text" id="meta-title" placeholder="e.g. Internal HR Policy 2024" />
+      <label>Short description</label>
+      <textarea id="meta-desc" placeholder="e.g. Covers employment conditions, working hours, holiday, and benefits."></textarea>
+      <div class="example-queries">
+        Try:
+        <span onclick="fillMeta('Internal HR Policy 2024', 'Covers employment conditions, working hours, holiday, salary, and benefits. Confidential.')">HR Policy</span>
+        <span onclick="fillMeta('Privacy Policy 2024', 'GDPR-compliant privacy policy about data collection and customer rights.')">Privacy Policy</span>
+        <span onclick="fillMeta('Product Warranty 2024', 'Warranty conditions for electronics and accessories sold by Nordic Shop.')">Warranty</span>
+      </div>
+      <br/>
+      <button onclick="runMeta()" id="meta-btn">Extract Metadata</button>
+    </div>
+
+    <!-- Mode 2: Select a file -->
+    <div id="case3-file" class="mode-panel">
+      <label>Select a pre-loaded document</label>
+      <select id="meta-filename">
+        <optgroup label="TXT documents">
+          <option value="return-policy.txt">return-policy.txt</option>
+          <option value="delivery-terms.txt">delivery-terms.txt</option>
+          <option value="product-warranty.txt">product-warranty.txt</option>
+          <option value="privacy-policy.txt">privacy-policy.txt</option>
+          <option value="internal-hr-policy.txt">internal-hr-policy.txt</option>
+        </optgroup>
+        <optgroup label="PDF documents">
+          <option value="return-policy.pdf">return-policy.pdf</option>
+          <option value="delivery-terms.pdf">delivery-terms.pdf</option>
+          <option value="product-warranty.pdf">product-warranty.pdf</option>
+          <option value="privacy-policy.pdf">privacy-policy.pdf</option>
+          <option value="internal-hr-policy.pdf">internal-hr-policy.pdf</option>
+        </optgroup>
+      </select>
+      <small style="color:#888; display:block; margin-top:-8px; margin-bottom:12px;">
+        Full text is extracted and sent directly in the LLM prompt – no vector search.
+      </small>
+      <button onclick="runMetaFile()" id="meta-file-btn">Extract Metadata</button>
+    </div>
+
+    <!-- Mode 3: Upload -->
+    <div id="case3-upload" class="mode-panel">
+      <div class="upload-area" onclick="document.getElementById('meta-upload-input').click()">
+        <input type="file" id="meta-upload-input" accept=".pdf,.txt" onchange="runMetaUpload()" />
+        <div class="upload-label">
+          <strong>Click to upload</strong> a PDF or TXT file<br/>
+          <small style="color:#aaa;">Full text sent directly in the LLM prompt – no vector search</small>
+        </div>
+      </div>
+    </div>
 
     <div id="meta-result" class="result" style="display:none"></div>
   </div>
@@ -222,11 +342,18 @@
   const API = "http://localhost:8000";
 
   function showTab(id) {
-    document.querySelectorAll(".tab").forEach((t, i) => {
-      t.classList.toggle("active", ["case1","case2","case3"][i] === id);
-    });
+    const ids = ["case1","case2","case3"];
+    document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("active", ids[i] === id));
     document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
     document.getElementById(id).classList.add("active");
+  }
+
+  function switchMode(caseId, mode, btn) {
+    const card = document.getElementById(caseId);
+    card.querySelectorAll(".mode-tab").forEach(t => t.classList.remove("active"));
+    btn.classList.add("active");
+    card.querySelectorAll(".mode-panel").forEach(p => p.classList.remove("active"));
+    document.getElementById(`${caseId}-${mode}`).classList.add("active");
   }
 
   function fillSearch(q) { document.getElementById("search-query").value = q; }
@@ -244,13 +371,11 @@
     el.style.display = "block";
     el.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
   }
-
-  function showLoading(id) {
+  function showLoading(id, msg) {
     const el = document.getElementById(id);
     el.style.display = "block";
-    el.innerHTML = `<span class="loading">Thinking... (this may take a few seconds)</span>`;
+    el.innerHTML = `<span class="loading">${msg || "Thinking..."}</span>`;
   }
-
   function showError(id, msg) {
     const el = document.getElementById(id);
     el.style.display = "block";
@@ -265,15 +390,11 @@
     showLoading("search-result");
     try {
       const res = await fetch(`${API}/api/case1/search`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query })
       });
-      const data = await res.json();
-      showResult("search-result", data);
-    } catch (e) {
-      showError("search-result", "Could not connect to API. Is the backend running on port 8000?");
-    }
+      showResult("search-result", await res.json());
+    } catch { showError("search-result", "Could not connect to API. Is the backend running on port 8000?"); }
     btn.disabled = false;
   }
 
@@ -286,16 +407,41 @@
     showLoading("classify-result");
     try {
       const res = await fetch(`${API}/api/case2/classify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description })
       });
-      const data = await res.json();
-      showResult("classify-result", data);
-    } catch (e) {
-      showError("classify-result", "Could not connect to API. Is the backend running on port 8000?");
-    }
+      showResult("classify-result", await res.json());
+    } catch { showError("classify-result", "Could not connect to API."); }
     btn.disabled = false;
+  }
+
+  async function runClassifyFile() {
+    const filename = document.getElementById("classify-filename").value;
+    const btn = document.getElementById("classify-file-btn");
+    btn.disabled = true;
+    showLoading("classify-result", `Reading "${filename}" and classifying...`);
+    try {
+      const res = await fetch(`${API}/api/case2/classify/file`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename })
+      });
+      showResult("classify-result", await res.json());
+    } catch { showError("classify-result", "Could not connect to API."); }
+    btn.disabled = false;
+  }
+
+  async function runClassifyUpload() {
+    const fileInput = document.getElementById("classify-upload-input");
+    const file = fileInput.files[0];
+    if (!file) return;
+    showLoading("classify-result", `Uploading "${file.name}"...`);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API}/api/case2/classify/upload`, { method: "POST", body: formData });
+      showResult("classify-result", await res.json());
+    } catch { showError("classify-result", "Could not connect to API."); }
+    fileInput.value = "";
   }
 
   async function runMeta() {
@@ -307,16 +453,41 @@
     showLoading("meta-result");
     try {
       const res = await fetch(`${API}/api/case3/metadata`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description })
       });
-      const data = await res.json();
-      showResult("meta-result", data);
-    } catch (e) {
-      showError("meta-result", "Could not connect to API. Is the backend running on port 8000?");
-    }
+      showResult("meta-result", await res.json());
+    } catch { showError("meta-result", "Could not connect to API."); }
     btn.disabled = false;
+  }
+
+  async function runMetaFile() {
+    const filename = document.getElementById("meta-filename").value;
+    const btn = document.getElementById("meta-file-btn");
+    btn.disabled = true;
+    showLoading("meta-result", `Reading "${filename}" and extracting metadata...`);
+    try {
+      const res = await fetch(`${API}/api/case3/metadata/file`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename })
+      });
+      showResult("meta-result", await res.json());
+    } catch { showError("meta-result", "Could not connect to API."); }
+    btn.disabled = false;
+  }
+
+  async function runMetaUpload() {
+    const fileInput = document.getElementById("meta-upload-input");
+    const file = fileInput.files[0];
+    if (!file) return;
+    showLoading("meta-result", `Uploading "${file.name}"...`);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API}/api/case3/metadata/upload`, { method: "POST", body: formData });
+      showResult("meta-result", await res.json());
+    } catch { showError("meta-result", "Could not connect to API."); }
+    fileInput.value = "";
   }
 </script>
 

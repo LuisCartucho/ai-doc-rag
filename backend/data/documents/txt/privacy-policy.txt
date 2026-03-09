@@ -1,0 +1,57 @@
+PRIVACY POLICY – NORDIC SHOP LTD
+Company No: 12345678
+Address: Warehouse Road 12, 8000 Aarhus C
+Last updated: February 1, 2024
+
+1. DATA CONTROLLER
+Nordic Shop Ltd is the data controller for the processing of your personal data in connection with your purchase and use of our website.
+Contact regarding data protection: privacy@nordicshop.com
+
+2. WHAT PERSONAL DATA WE COLLECT
+We collect the following information:
+- Name and address (for delivery and invoicing)
+- Email address (for order confirmation and newsletter, if you have given consent)
+- Phone number (for delivery notifications from the courier)
+- Payment data (card details are processed by Stripe – we do not store your card data)
+- IP address and browser data (via necessary and analytical cookies)
+- Order history and preferences (for customer service and improving our services)
+
+3. PURPOSE AND LEGAL BASIS
+We process your data for the following purposes:
+- Order processing and delivery (performance of contract, GDPR art. 6(1)(b))
+- Customer service and support (legitimate interest, GDPR art. 6(1)(f))
+- Marketing and newsletter (consent, GDPR art. 6(1)(a))
+- Statutory bookkeeping and accounting (legal obligation, GDPR art. 6(1)(c))
+- Fraud prevention (legitimate interest, GDPR art. 6(1)(f))
+
+4. RETENTION AND DELETION
+Order data and invoice details are retained for 5 years (required under the Bookkeeping Act).
+Marketing data and consent preferences are deleted immediately upon withdrawal of consent.
+Cookie data is deleted after 13 months.
+Inactive customer accounts are deleted after 3 years of inactivity.
+
+5. SHARING OF DATA
+We only share your data with:
+- Courier companies (GLS, DAO) – for delivery of your order
+- Payment processor (Stripe) – for secure payment
+- Accounting software (Xero) – for bookkeeping
+We never sell your personal data to third parties.
+
+6. YOUR RIGHTS
+You have the following rights under GDPR:
+- Right of access to your personal data
+- Right to rectification of incorrect information
+- Right to erasure ("the right to be forgotten")
+- Right to restriction of processing
+- Right to data portability
+- Right to object to processing
+Requests are sent to: privacy@nordicshop.com
+
+7. COMPLAINTS
+You have the right to lodge a complaint with the Information Commissioner's Office (ICO):
+  ico.org.uk | 0303 123 1113
+
+8. COOKIES
+We use necessary cookies for the website to function.
+With your consent, we also use analytical cookies (Google Analytics).
+You can withdraw your consent at any time via our cookie settings.
