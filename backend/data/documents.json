@@ -1,0 +1,57 @@
+[
+  {
+    "id": "doc-001",
+    "title": "Return Policy 2024",
+    "filename": "return-policy.txt",
+    "type": "policy",
+    "tags": ["return", "withdrawal", "refund", "complaint", "14 days"],
+    "description": "Describes rules for returning items, 14-day right of withdrawal, and complaint rights. Covers return shipping costs and exceptions.",
+    "language": "en",
+    "valid_from": "2024-01-01",
+    "department": "Customer Service"
+  },
+  {
+    "id": "doc-002",
+    "title": "Delivery Terms 2024",
+    "filename": "delivery-terms.txt",
+    "type": "policy",
+    "tags": ["delivery", "shipping", "express", "GLS", "DAO", "free shipping"],
+    "description": "Describes delivery times, shipping prices, delivery methods, and geographic coverage. Standard 2-4 days, express 1-2 days.",
+    "language": "en",
+    "valid_from": "2024-01-01",
+    "department": "Logistics"
+  },
+  {
+    "id": "doc-003",
+    "title": "Product Warranty 2024",
+    "filename": "product-warranty.txt",
+    "type": "warranty",
+    "tags": ["warranty", "guarantee", "electronics", "repair", "2 years", "defect"],
+    "description": "Warranty conditions for electronics (2 years) and accessories (1 year). Covers what is and is not included in the warranty.",
+    "language": "en",
+    "valid_from": "2024-03-01",
+    "department": "Customer Service"
+  },
+  {
+    "id": "doc-004",
+    "title": "Privacy Policy 2024",
+    "filename": "privacy-policy.txt",
+    "type": "legal",
+    "tags": ["GDPR", "privacy", "personal data", "cookies", "data rights", "consent"],
+    "description": "GDPR-compliant privacy policy. Describes what data is collected, why, how long it is stored, and customer rights.",
+    "language": "en",
+    "valid_from": "2024-02-01",
+    "department": "Legal"
+  },
+  {
+    "id": "doc-005",
+    "title": "Internal HR Policy 2024",
+    "filename": "internal-hr-policy.txt",
+    "type": "internal",
+    "tags": ["HR", "employment", "holiday", "salary", "sick leave", "flexible working", "pension"],
+    "description": "Internal HR policy covering employment conditions, working hours, holiday, sick leave, salary, and benefits. Confidential.",
+    "language": "en",
+    "valid_from": "2024-01-01",
+    "department": "HR"
+  }
+]

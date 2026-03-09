@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Doc Cases – No RAG</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #333; }
+
+    header {
+      background: #e74c3c;
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 { font-size: 1.2rem; }
+    header .badge {
+      background: rgba(255,255,255,0.25);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+    }
+
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #eee;
+      padding: 0 24px;
+    }
+    .tab {
+      padding: 14px 20px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: #888;
+      transition: all 0.15s;
+    }
+    .tab.active { border-bottom-color: #e74c3c; color: #e74c3c; }
+    .tab:hover { color: #e74c3c; }
+
+    .panel { display: none; padding: 24px; max-width: 800px; margin: 0 auto; }
+    .panel.active { display: block; }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .card h2 { font-size: 1rem; margin-bottom: 4px; }
+    .card p { font-size: 0.85rem; color: #666; margin-bottom: 16px; }
+
+    label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px; }
+    input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    button {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    button:hover { background: #c0392b; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+
+    .result {
+      background: #f8f8f8;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 14px;
+      margin-top: 14px;
+      font-size: 0.82rem;
+    }
+    .result pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+    }
+
+    .warning-banner {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      margin-bottom: 16px;
+      color: #856404;
+    }
+
+    .loading { color: #888; font-style: italic; }
+    .error { color: #e74c3c; }
+
+    .example-queries { margin-top: 8px; }
+    .example-queries span {
+      display: inline-block;
+      background: #ffeaa7;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      margin: 3px 3px 3px 0;
+    }
+    .example-queries span:hover { background: #fdcb6e; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>AI Doc Cases</h1>
+  <span class="badge">No RAG</span>
+  <span style="font-size:0.8rem; opacity:0.8;">API uses only metadata – no actual document content</span>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('case1')">Case 1 – Search</div>
+  <div class="tab" onclick="showTab('case2')">Case 2 – Classify</div>
+  <div class="tab" onclick="showTab('case3')">Case 3 – Metadata</div>
+</div>
+
+<!-- CASE 1: Search -->
+<div id="case1" class="panel active">
+  <div class="warning-banner">
+    No RAG: The AI only sees document <strong>titles, tags, and descriptions</strong>. It cannot read actual document content.
+  </div>
+  <div class="card">
+    <h2>Case 1 – Document Search</h2>
+    <p>Enter a question. The AI will try to find the right document based on metadata only.</p>
+
+    <label>Your query</label>
+    <input type="text" id="search-query" placeholder="e.g. how do I return a product?" />
+
+    <div class="example-queries">
+      Try:
+      <span onclick="fillSearch('how do I return a product?')">how do I return a product?</span>
+      <span onclick="fillSearch('what are the shipping costs?')">what are the shipping costs?</span>
+      <span onclick="fillSearch('who is the data controller?')">who is the data controller?</span>
+      <span onclick="fillSearch('how many days holiday do employees get?')">employee holiday days</span>
+    </div>
+
+    <br/>
+    <button onclick="runSearch()" id="search-btn">Search</button>
+
+    <div id="search-result" class="result" style="display:none"></div>
+  </div>
+</div>
+
+<!-- CASE 2: Classify -->
+<div id="case2" class="panel">
+  <div class="warning-banner">
+    No RAG: Classification is based on <strong>title and description only</strong>. Ambiguous documents may be misclassified.
+  </div>
+  <div class="card">
+    <h2>Case 2 – Document Classification</h2>
+    <p>Enter a document title and description. The AI will classify it into one of 5 categories.</p>
+
+    <label>Document title</label>
+    <input type="text" id="classify-title" placeholder="e.g. Return Policy 2024" />
+
+    <label>Short description</label>
+    <textarea id="classify-desc" placeholder="e.g. Describes rules for returning items and 14-day withdrawal rights."></textarea>
+
+    <div class="example-queries">
+      Try (click to fill):
+      <span onclick="fillClassify('Return Policy 2024', 'Describes rules for returning items and 14-day withdrawal rights.')">Return Policy</span>
+      <span onclick="fillClassify('Internal HR Policy 2024', 'Covers employment conditions, working hours, holiday, and benefits. Confidential.')">HR Policy</span>
+      <span onclick="fillClassify('Product Warranty 2024', 'Warranty conditions for electronics and accessories.')">Warranty</span>
+    </div>
+
+    <br/>
+    <button onclick="runClassify()" id="classify-btn">Classify</button>
+
+    <div id="classify-result" class="result" style="display:none"></div>
+  </div>
+</div>
+
+<!-- CASE 3: Metadata -->
+<div id="case3" class="panel">
+  <div class="warning-banner">
+    No RAG: Metadata is extracted from <strong>title and description only</strong>. Specific dates and rules may be hallucinated.
+  </div>
+  <div class="card">
+    <h2>Case 3 – Metadata Extraction</h2>
+    <p>Enter a document title and description. The AI will extract structured metadata.</p>
+
+    <label>Document title</label>
+    <input type="text" id="meta-title" placeholder="e.g. Internal HR Policy 2024" />
+
+    <label>Short description</label>
+    <textarea id="meta-desc" placeholder="e.g. Covers employment conditions, working hours, holiday, and benefits."></textarea>
+
+    <div class="example-queries">
+      Try (click to fill):
+      <span onclick="fillMeta('Internal HR Policy 2024', 'Covers employment conditions, working hours, holiday, salary, and benefits. Confidential.')">HR Policy</span>
+      <span onclick="fillMeta('Privacy Policy 2024', 'GDPR-compliant privacy policy about data collection and customer rights.')">Privacy Policy</span>
+      <span onclick="fillMeta('Product Warranty 2024', 'Warranty conditions for electronics and accessories sold by Nordic Shop.')">Warranty</span>
+    </div>
+
+    <br/>
+    <button onclick="runMeta()" id="meta-btn">Extract Metadata</button>
+
+    <div id="meta-result" class="result" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+  const API = "http://localhost:8000";
+
+  function showTab(id) {
+    document.querySelectorAll(".tab").forEach((t, i) => {
+      t.classList.toggle("active", ["case1","case2","case3"][i] === id);
+    });
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  function fillSearch(q) { document.getElementById("search-query").value = q; }
+  function fillClassify(t, d) {
+    document.getElementById("classify-title").value = t;
+    document.getElementById("classify-desc").value = d;
+  }
+  function fillMeta(t, d) {
+    document.getElementById("meta-title").value = t;
+    document.getElementById("meta-desc").value = d;
+  }
+
+  function showResult(id, data) {
+    const el = document.getElementById(id);
+    el.style.display = "block";
+    el.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+  }
+
+  function showLoading(id) {
+    const el = document.getElementById(id);
+    el.style.display = "block";
+    el.innerHTML = `<span class="loading">Thinking... (this may take a few seconds)</span>`;
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.style.display = "block";
+    el.innerHTML = `<span class="error">Error: ${msg}</span>`;
+  }
+
+  async function runSearch() {
+    const query = document.getElementById("search-query").value.trim();
+    if (!query) return alert("Please enter a query");
+    const btn = document.getElementById("search-btn");
+    btn.disabled = true;
+    showLoading("search-result");
+    try {
+      const res = await fetch(`${API}/api/case1/search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json();
+      showResult("search-result", data);
+    } catch (e) {
+      showError("search-result", "Could not connect to API. Is the backend running on port 8000?");
+    }
+    btn.disabled = false;
+  }
+
+  async function runClassify() {
+    const title = document.getElementById("classify-title").value.trim();
+    const description = document.getElementById("classify-desc").value.trim();
+    if (!title || !description) return alert("Please fill in both fields");
+    const btn = document.getElementById("classify-btn");
+    btn.disabled = true;
+    showLoading("classify-result");
+    try {
+      const res = await fetch(`${API}/api/case2/classify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, description })
+      });
+      const data = await res.json();
+      showResult("classify-result", data);
+    } catch (e) {
+      showError("classify-result", "Could not connect to API. Is the backend running on port 8000?");
+    }
+    btn.disabled = false;
+  }
+
+  async function runMeta() {
+    const title = document.getElementById("meta-title").value.trim();
+    const description = document.getElementById("meta-desc").value.trim();
+    if (!title || !description) return alert("Please fill in both fields");
+    const btn = document.getElementById("meta-btn");
+    btn.disabled = true;
+    showLoading("meta-result");
+    try {
+      const res = await fetch(`${API}/api/case3/metadata`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, description })
+      });
+      const data = await res.json();
+      showResult("meta-result", data);
+    } catch (e) {
+      showError("meta-result", "Could not connect to API. Is the backend running on port 8000?");
+    }
+    btn.disabled = false;
+  }
+</script>
+
+</body>
+</html>
